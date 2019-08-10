@@ -51,11 +51,12 @@ while True:
     gps.update()
     # Every second print out current location details if there's a fix.
     current = time.monotonic()
-    if current - last_print >= 7.0: # zlc changing to 7
+    if current - last_print >= 13.0: # zlc changing to 13
         last_print = current
         if not gps.has_fix:
             # Try again if we don't have a fix yet.
             print('Waiting for fix...')
+            r = requests.post('http://whereispaolo.org/log', json={'msg':'Waiting for fix...'})
             continue
         # We have a fix! (gps.has_fix is true)
         # Print out details about the fix like location, date, etc.
@@ -76,3 +77,9 @@ while True:
             print('# satellites: {}'.format(gps.satellites))
         if gps.altitude_m is not None:
             print('Altitude: {} meters'.format(gps.altitude_m))
+
+        gps_payload= {
+            'Latitude': '{0:.6f} degrees'.format(gps.latitude),
+            'Longitude': '{0:.6f} degrees'.format(gps.longitude),
+        }
+        r = requests.post('http://whereispaolo.org/log', json=gps_payload)

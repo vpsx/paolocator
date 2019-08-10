@@ -54,3 +54,7 @@ Wire up GPS module to Pi UART:
 Enable UART via `sudo raspi config`; reboot.
 
 See the CircuitPython section of Adafruit's Ultimate GPS tutorial for more details.
+
+### Random stuff
+
+configure network at `/etc/wpa_supplicant/wpa_supplicant.conf`
