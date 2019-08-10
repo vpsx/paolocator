@@ -7,6 +7,9 @@ verify_ssl = true
 
 [packages]
 requests = "*"
+adafruit-circuitpython-gps = "*"
+adafruit-blinka = "*"
+pyserial = "*"
 
 [requires]
 python_version = "3.7"

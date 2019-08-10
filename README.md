@@ -3,6 +3,8 @@ point at paolo
 
 ### Setup log
 
+(This is just so I know... but obviously in theory just do `pipenv install` from lockfile)
+
 ```
 $ pip install --user pipenv
 $ export PATH=/home/pi/.local/bin:$PATH
@@ -19,6 +21,12 @@ $ pipenv --python 3
 $ pipenv run python --version
 $ pipenv install
 $ pipenv run python main.py
+```
+
+```
+pipenv install adafruit-circuitpython-gps
+pipenv install adafruit_blinka
+pipenv install pyserial
 ```
 
 ### Incomplete list of useful links
