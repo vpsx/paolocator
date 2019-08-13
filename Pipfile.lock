@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "8ba56c65a030e205a6fbfffdaec3553ba2f46f4896f82f22604d03c2b5fb21f0"
+            "sha256": "497f177911427a311077a41eacf756b380c252585561f05a359ca5c848bf4aa9"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -23,12 +23,25 @@
             "index": "pypi",
             "version": "==2.3.0"
         },
+        "adafruit-circuitpython-busdevice": {
+            "hashes": [
+                "sha256:f1852212a9cab3f6735ed2b9e27b9620855a4ca43c95e13d6e59d7f2b02be26a"
+            ],
+            "version": "==3.0.0"
+        },
         "adafruit-circuitpython-gps": {
             "hashes": [
                 "sha256:e473127539a154ae817e62d43b0e255203e942835b57692e3484c62e68c2980e"
             ],
             "index": "pypi",
             "version": "==3.3.0"
+        },
+        "adafruit-circuitpython-lsm303": {
+            "hashes": [
+                "sha256:d65c4841dad61dd77b982603d4b0ebcb9429466aea9db3fdfe0c87086d5a464e"
+            ],
+            "index": "pypi",
+            "version": "==1.2.4"
         },
         "adafruit-platformdetect": {
             "hashes": [

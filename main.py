@@ -1,9 +1,11 @@
 # With many thanks to Adafruit_CircuitPython_GPS and its examples folder
 
 import time
+import math
 import board
 import busio
 import adafruit_gps
+import adafruit_lsm303
 import serial
 
 import requests
@@ -11,6 +13,10 @@ import requests
 # Random http requests stuff for later
 # response = requests.get('https://httpbin.org/ip')
 # print('Your IP is {0}'.format(response.json()['origin']))
+
+# Yay accelerometer and magnetometer!
+i2c = busio.I2C(board.SCL, board.SDA)
+accelmag = adafruit_lsm303.LSM303(i2c)
 
 # pi--therefore use pyserial library for uart access.
 # I'm using built-in UART on Pi, so device name /dev/ttyS0
@@ -42,17 +48,28 @@ gps.send_command(b'PMTK220,1000')
 #gps.send_command(b'PMTK220,500')
 
 # Main loop runs forever printing the location, etc. every second.
-last_print = time.monotonic()
+last_gps_print = time.monotonic()
+last_acm_print = time.monotonic()
 while True:
     # Make sure to call gps.update() every loop iteration and at least twice
     # as fast as data comes from the GPS unit (usually every second).
     # This returns a bool that's true if it parsed new data (you can ignore it
     # though if you don't care and instead look at the has_fix property).
     gps.update()
-    # Every second print out current location details if there's a fix.
     current = time.monotonic()
-    if current - last_print >= 13.0: # zlc changing to 13
-        last_print = current
+    # Every second print out current accel/mag readings.
+    if current - last_acm_print >= 1.0:
+        last_acm_print = current
+        acc_x, acc_y, acc_z = accelmag.acceleration
+        mag_x, mag_y, mag_z = accelmag.magnetic
+        #print('Acceleration (ms2)         : X={0:0.3f} Y={1:0.3f} Z={2:0.3f}'.format(*accelmag.acceleration))
+        print('Magnetometer (micro-Teslas): X={0:0.3f} Y={1:0.3f} Z={2:0.3f}'.format(*accelmag.magnetic))
+        heading = math.degrees(math.atan2(mag_y, mag_x))
+        heading = 360 + heading if heading < 0 else heading
+        print('Heading: {}'.format(heading))
+    # Every second print out current location details if there's a fix.
+    if current - last_gps_print >= 13.0: # zlc changing to 13
+        last_gps_print = current
         if not gps.has_fix:
             # Try again if we don't have a fix yet.
             print('Waiting for fix...')

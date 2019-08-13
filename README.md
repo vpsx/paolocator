@@ -29,6 +29,13 @@ pipenv install adafruit_blinka
 pipenv install pyserial
 ```
 
+```
+pipenv install adafruit-circuitpython-lsm303
+```
+_Not_ `pipenv install circuitpython-build-tools` followed by `pipenv run circuitpython-build-bundles blah`--this is ~insane and uncivilised~ actually not for Linux.
+
+You must also `sudo raspi-config` - Interfacing Options - I2C - Enable.
+
 ### Incomplete list of useful links
 
 github.com/adafruit/Adafruit_CircuitPython_GPS
@@ -54,6 +61,16 @@ Wire up GPS module to Pi UART:
 Enable UART via `sudo raspi config`; reboot.
 
 See the CircuitPython section of Adafruit's Ultimate GPS tutorial for more details.
+
+#### Compass (Accelerometer + Magnetometer)
+
+This setup uses the LSM303, which uses I2C.
+
+Wiring as expected: VIN to 3.3V or 5V; GND, SDA, SCL.
+
+A note on MEMS magnetometers: You need to think conspiratorially about your compass, because legitimately everything will screw with your heading, including power banks. Do not set your breadboard on top of your power brick. Or your phone.
+
+
 
 ### Random stuff
 

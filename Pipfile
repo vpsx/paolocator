@@ -10,6 +10,7 @@ requests = "*"
 adafruit-circuitpython-gps = "*"
 adafruit-blinka = "*"
 pyserial = "*"
+adafruit-circuitpython-lsm303 = "*"
 
 [requires]
 python_version = "3.7"
