@@ -1,4 +1,7 @@
 # With many thanks to Adafruit_CircuitPython_GPS and its examples folder
+# Also to "Chris H" off whose magnetometer tilt-compensation code my own is based:
+# learn.adafruit.com/lsm303-accelerometer-slash-compass-breakout/calibration
+# #chris-hs-calibration-6-4
 
 import time
 import math
@@ -62,11 +65,27 @@ while True:
         last_acm_print = current
         acc_x, acc_y, acc_z = accelmag.acceleration
         mag_x, mag_y, mag_z = accelmag.magnetic
-        #print('Acceleration (ms2)         : X={0:0.3f} Y={1:0.3f} Z={2:0.3f}'.format(*accelmag.acceleration))
-        print('Magnetometer (micro-Teslas): X={0:0.3f} Y={1:0.3f} Z={2:0.3f}'.format(*accelmag.magnetic))
-        heading = math.degrees(math.atan2(mag_y, mag_x))
+
+        print('Acceleration (m/s^2): ({0:10.3f}, {1:10.3f}, {2:10.3f})'.format(acc_x, acc_y, acc_z))
+        print('Magnetometer (gauss): ({0:10.3f}, {1:10.3f}, {2:10.3f})'.format(mag_x, mag_y, mag_z))
+
+        acc_norm = math.sqrt(acc_x * acc_x + acc_y * acc_y + acc_z * acc_z)
+        pitch = math.asin(acc_x/acc_norm)
+        roll =  math.asin(acc_y/acc_norm)
+        print('Pitch  : {}'.format(math.degrees(pitch)))
+        print('Roll   : {}'.format(math.degrees(roll)))
+
+        # Could normalize mag vals as above but ehhh
+
+        # Tilt compensated magnetic sensor measurements
+        tilt_mag_x = mag_x * math.cos(pitch) - mag_z * math.sin(pitch)
+        tilt_mag_y = mag_y * math.cos(roll) - mag_z * math.sin(roll)
+        print('Tilt-comp mag       : ({0:10.3f}, {1:10.3f})'.format(tilt_mag_x, tilt_mag_y))
+
+        heading = math.degrees(math.atan2(tilt_mag_y, tilt_mag_x))
         heading = 360 + heading if heading < 0 else heading
         print('Heading: {}'.format(heading))
+        print('')
     # Every second print out current location details if there's a fix.
     if current - last_gps_print >= 13.0: # zlc changing to 13
         last_gps_print = current
