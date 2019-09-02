@@ -1,3 +1,9 @@
+WHOAMI = "LAOPO"
+SEAKRIT = "REDACTED"
+FRIEND = "tadpoles"
+DEFOLT_LAT = 41.79596
+DEFOLT_LONG = -87.58158
+
 # With many thanks to Adafruit_CircuitPython_GPS and its examples folder
 # Also to "Chris H" off whose magnetometer tilt-compensation code my own is based:
 # learn.adafruit.com/lsm303-accelerometer-slash-compass-breakout/calibration
@@ -39,7 +45,6 @@ gps = adafruit_gps.GPS(uart)
 gps.send_command(b'PMTK314,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0')
 # Turn on just minimum info (RMC only, location):
 #gps.send_command(b'PMTK314,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0')
-# TODO: Naa I'm pretty sure I want just GGA???????? Figure out how
 
 # Set update rate to once a second (1hz) which is what you typically want.
 gps.send_command(b'PMTK220,1000')
@@ -53,6 +58,10 @@ gps.send_command(b'PMTK220,1000')
 # Main loop runs forever printing the location, etc. every second.
 last_gps_print = time.monotonic()
 last_acm_print = time.monotonic()
+friend_lat = None
+friend_long = None
+my_lat = DEFOLT_LAT
+my_long = DEFOLT_LONG
 while True:
     # Make sure to call gps.update() every loop iteration and at least twice
     # as fast as data comes from the GPS unit (usually every second).
@@ -61,7 +70,7 @@ while True:
     gps.update()
     current = time.monotonic()
     # Every second print out current accel/mag readings.
-    if current - last_acm_print >= 1.0:
+    if current - last_acm_print >= 3.0:
         last_acm_print = current
         acc_x, acc_y, acc_z = accelmag.acceleration
         mag_x, mag_y, mag_z = accelmag.magnetic
@@ -87,7 +96,7 @@ while True:
         print('Heading: {}'.format(heading))
         #print('')
     # Every second print out current location details if there's a fix.
-    if current - last_gps_print >= 13.0: # zlc changing to 13
+    if current - last_gps_print >= 3.0:
         last_gps_print = current
         if not gps.has_fix:
             # Try again if we don't have a fix yet.
@@ -95,27 +104,46 @@ while True:
             r = requests.post('http://whereispaolo.org/log', json={'msg':'Waiting for fix...'})
             continue
         # We have a fix! (gps.has_fix is true)
-        # Print out details about the fix like location, date, etc.
         print('=' * 40)  # Print a separator line.
-        print('Fix timestamp: {}/{}/{} {:02}:{:02}:{:02}'.format(
+        timestring = 'Fix at {}/{}/{} {:02}:{:02}:{:02}'.format(
             gps.timestamp_utc.tm_mon,   # Grab parts of the time from the
             gps.timestamp_utc.tm_mday,  # struct_time object that holds
             gps.timestamp_utc.tm_year,  # the fix time.  Note you might
             gps.timestamp_utc.tm_hour,  # not get all data like year, day,
             gps.timestamp_utc.tm_min,   # month!
-            gps.timestamp_utc.tm_sec))
+            gps.timestamp_utc.tm_sec
+        )
+        print('Timestamp: {}'.format(timestring))
         print('Latitude: {0:.6f} degrees'.format(gps.latitude))
         print('Longitude: {0:.6f} degrees'.format(gps.longitude))
-        print('Fix quality: {}'.format(gps.fix_quality))
-        # Some attributes beyond latitude, longitude and timestamp are optional
-        # and might not be present.  Check if they're None before trying to use!
-        if gps.satellites is not None:
-            print('# satellites: {}'.format(gps.satellites))
-        if gps.altitude_m is not None:
-            print('Altitude: {} meters'.format(gps.altitude_m))
-
         gps_payload= {
-            'Latitude': '{0:.6f} degrees'.format(gps.latitude),
-            'Longitude': '{0:.6f} degrees'.format(gps.longitude),
+            'Name': WHOAMI,
+            'Timestamp': timestring,
+            'Latitude': gps.latitude,
+            'Longitude': gps.longitude,
         }
         r = requests.post('http://whereispaolo.org/log', json=gps_payload)
+        r = requests.post('http://whereispaolo.org/givelocation', json=gps_payload)
+        my_lat = gps.latitude
+        my_long = gps.longitude
+
+    fr = requests.get('http://whereispaolo.org/getlocation?name={}'.format(FRIEND))
+    try:
+        friend_lat = fr.json()['latitude']
+        friend_long = fr.json()['longitude']
+    except Exception as e: # shh
+        print(e)
+        continue # ???
+
+    # https://www.movable-type.co.uk/scripts/latlong.html
+    fwd_azimuth = math.degrees(math.atan2(
+        math.sin(friend_long-my_long) * math.cos(friend_lat),
+        math.cos(my_lat) * math.sin(friend_lat)
+        - math.sin(my_lat) * math.cos(friend_lat)
+        * math.cos(friend_long-my_long)
+    ))
+    fwd_azimuth = 360 + fwd_azimuth if fwd_azimuth < 0 else fwd_azimuth
+
+    print("Forward azimuth: {0:.6f} degrees".format(fwd_azimuth))
+    azi_payload = {'Fwd Azimuth': fwd_azimuth}
+    r = requests.post('http://whereispaolo.org/log', json=azi_payload)
