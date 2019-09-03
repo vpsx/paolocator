@@ -1,8 +1,8 @@
 WHOAMI = "LAOPO"
 SEAKRIT = "REDACTED"
 FRIEND = "tadpoles"
-DEFOLT_LAT = 41.79596
-DEFOLT_LONG = -87.58158
+DEFOLT_LAT = 41.796235
+DEFOLT_LONG = -87.581281
 
 # With many thanks to Adafruit_CircuitPython_GPS and its examples folder
 # Also to "Chris H" off whose magnetometer tilt-compensation code my own is based:
@@ -81,7 +81,7 @@ while True:
     gps.update()
     current = time.monotonic()
     # Every second print out current accel/mag readings.
-    if current - last_acm_print >= 3.0:
+    if current - last_acm_print >= 1.0:
         last_acm_print = current
         acc_x, acc_y, acc_z = accelmag.acceleration
         mag_x, mag_y, mag_z = accelmag.magnetic
@@ -147,11 +147,15 @@ while True:
         continue # ???
 
     # https://www.movable-type.co.uk/scripts/latlong.html
+    fr_lat_r = math.radians(friend_lat)
+    fr_long_r = math.radians(friend_long)
+    my_lat_r = math.radians(my_lat)
+    my_long_r = math.radians(my_long)
     fwd_azimuth = math.degrees(math.atan2(
-        math.sin(friend_long-my_long) * math.cos(friend_lat),
-        math.cos(my_lat) * math.sin(friend_lat)
-        - math.sin(my_lat) * math.cos(friend_lat)
-        * math.cos(friend_long-my_long)
+        math.sin(fr_long_r - my_long_r) * math.cos(fr_lat_r),
+        math.cos(my_lat_r) * math.sin(fr_lat_r)
+        - math.sin(my_lat_r) * math.cos(fr_lat_r)
+        * math.cos(fr_long_r-my_long_r)
     ))
     fwd_azimuth = 360 + fwd_azimuth if fwd_azimuth < 0 else fwd_azimuth
 
