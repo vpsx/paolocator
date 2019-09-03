@@ -20,6 +20,13 @@ import RPi.GPIO as GPIO
 
 import requests
 
+SERVER_ADDR = 'http://whatever-ip-here:5000'
+#SERVER_ADDR = 'http://whereispaolo.org'
+
+url_log = SERVER_ADDR + '/log'
+url_giveloc = SERVER_ADDR + '/givelocation'
+url_getloc = SERVER_ADDR + '/getlocation'
+
 GPIO.setmode(GPIO.BCM)
 cr_servo_pwm_pin = 12
 GPIO.setup(cr_servo_pwm_pin, GPIO.OUT)
@@ -105,7 +112,7 @@ while True:
         if not gps.has_fix:
             # Try again if we don't have a fix yet.
             print('Waiting for fix...')
-            r = requests.post('http://whereispaolo.org/log', json={'msg':'Waiting for fix...'})
+            r = requests.post(url_log, json={'msg':'Waiting for fix...'})
             continue
         # We have a fix! (gps.has_fix is true)
         print('=' * 40)  # Print a separator line.
@@ -126,12 +133,12 @@ while True:
             'Latitude': gps.latitude,
             'Longitude': gps.longitude,
         }
-        r = requests.post('http://whereispaolo.org/log', json=gps_payload)
-        r = requests.post('http://whereispaolo.org/givelocation', json=gps_payload)
+        r = requests.post(url_log, json=gps_payload)
+        r = requests.post(url_giveloc, json=gps_payload)
         my_lat = gps.latitude
         my_long = gps.longitude
 
-    fr = requests.get('http://whereispaolo.org/getlocation?name={}'.format(FRIEND))
+    fr = requests.get(url_getloc+'?name={}'.format(FRIEND))
     try:
         friend_lat = fr.json()['latitude']
         friend_long = fr.json()['longitude']
@@ -150,7 +157,7 @@ while True:
 
     print("Forward azimuth: {0:.6f} degrees".format(fwd_azimuth))
     azi_payload = {'Fwd Azimuth': fwd_azimuth}
-    r = requests.post('http://whereispaolo.org/log', json=azi_payload)
+    r = requests.post(url_log, json=azi_payload)
 
     diff = fwd_azimuth - heading
     diff = diff - 360 if diff > 180 else diff
