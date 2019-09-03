@@ -16,12 +16,15 @@ import busio
 import adafruit_gps
 import adafruit_lsm303
 import serial
+import RPi.GPIO as GPIO
 
 import requests
 
-# Random http requests stuff for later
-# response = requests.get('https://httpbin.org/ip')
-# print('Your IP is {0}'.format(response.json()['origin']))
+GPIO.setmode(GPIO.BCM)
+cr_servo_pwm_pin = 12
+GPIO.setup(cr_servo_pwm_pin, GPIO.OUT)
+cr_servo_pwm = GPIO.PWM(cr_servo_pwm_pin, 50) # channel, frequency
+cr_servo_pwm.start(7.5) # calibrate to servo neutral
 
 # Yay accelerometer and magnetometer!
 i2c = busio.I2C(board.SCL, board.SDA)
@@ -62,6 +65,7 @@ friend_lat = None
 friend_long = None
 my_lat = DEFOLT_LAT
 my_long = DEFOLT_LONG
+heading = 0
 while True:
     # Make sure to call gps.update() every loop iteration and at least twice
     # as fast as data comes from the GPS unit (usually every second).
@@ -147,3 +151,16 @@ while True:
     print("Forward azimuth: {0:.6f} degrees".format(fwd_azimuth))
     azi_payload = {'Fwd Azimuth': fwd_azimuth}
     r = requests.post('http://whereispaolo.org/log', json=azi_payload)
+
+    diff = fwd_azimuth - heading
+    diff = diff - 360 if diff > 180 else diff
+    print("Diff: {0:.6f} degrees".format(diff))
+    if diff < 0:
+        # Turn arrow counter-clockwise... slowly
+        cr_servo_pwm.ChangeDutyCycle(7.7)
+    else:
+        # Turn arrow clockwise... slowly
+        cr_servo_pwm.ChangeDutyCycle(7.3)
+
+    print('\n\n')
+    time.sleep(1.0)
