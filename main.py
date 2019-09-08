@@ -31,7 +31,7 @@ GPIO.setmode(GPIO.BCM)
 cr_servo_pwm_pin = 12
 GPIO.setup(cr_servo_pwm_pin, GPIO.OUT)
 cr_servo_pwm = GPIO.PWM(cr_servo_pwm_pin, 50) # channel, frequency
-cr_servo_pwm.start(7.5) # calibrate to servo neutral
+#cr_servo_pwm.start(7.5) # calibrate to servo neutral
 
 # Yay accelerometer and magnetometer!
 i2c = busio.I2C(board.SCL, board.SDA)
@@ -164,14 +164,19 @@ while True:
     r = requests.post(url_log, json=azi_payload)
 
     diff = fwd_azimuth - heading
+    diff = diff % 360
     diff = diff - 360 if diff > 180 else diff
     print("Diff: {0:.6f} degrees".format(diff))
-    if diff < 0:
+    # Tolerate X degrees error
+    tolerate = 5.0
+    if diff < 0 - tolerate:
         # Turn arrow counter-clockwise... slowly
-        cr_servo_pwm.ChangeDutyCycle(7.7)
-    else:
+        cr_servo_pwm.start(7.7)
+    elif diff > 0 + tolerate:
         # Turn arrow clockwise... slowly
-        cr_servo_pwm.ChangeDutyCycle(7.3)
+        cr_servo_pwm.start(7.4)
 
-    print('\n\n')
-    time.sleep(1.0)
+    time.sleep(0.1)
+    cr_servo_pwm.stop()
+    time.sleep(0.2)
+    print('\n')
