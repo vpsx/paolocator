@@ -1,0 +1,24 @@
+# I belong in /etc/systemd/system as paolocator.service
+
+[Unit]
+Description=Paolocator starter
+After=multi-user.target
+
+[Service]
+Type=idle
+#ExecStart=cd /home/pi/paolocator; pipenv run python main.py > pao.log 2>&1
+#ExecStart=/usr/bin/touch /home/pi/paolocator/hohoho.txt; touch /home/pi/paolocator/anotherone.txt
+ExecStart=/bin/bash /home/pi/paolocator/start.sh > /home/pi/logslogslogs.txt 2>&1
+
+[Install]
+WantedBy=multi-user.target
+
+# Allegedly permission on this file needs to be set to 644 aka u=rw g=r o=r
+# sudo chmod 644 /etc/systemd/system/paolocator.service
+# But idk why
+# And isn't this run as root???
+
+# sudo systemctl daemon-reload
+# sudo systemctl enable paolocator.service
+# sudo reboot
+# sudo systemctl status paolocator.service
