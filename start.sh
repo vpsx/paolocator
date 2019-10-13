@@ -1,17 +1,18 @@
 #!/bin/sh
-#omegad this is called a shebang
+# This is started by systemd paolocator.service and run as root
+
 cd /home/pi/paolocator
-echo "Whoa it worked" >> worked.txt
-echo $(whoami) >> worked.txt
-# That's root.
-#su - pi -c "echo $(whoami) >> worked.txt"
-#su - pi -c "/home/pi/.local/bin/pipenv run python /home/pi/paolocator/main.py"
-echo $(whoami) >> worked.txt
+
+# These two need to be run the first time but not thereafter
+# ...so if you update the Pipfile... uncomment, run, recomment...
+# derp.
+# One day maybe I will know why, but it has to do with namespaces
+# ...probably
 #/usr/bin/pip install pipenv
-# vvv Need this to run the first time but let's see if thereafter
 #/home/pi/.local/bin/pipenv install
+
+# Actual thing that you want
 /home/pi/.local/bin/pipenv run python /home/pi/paolocator/main.py
+
+# For when you are troubleshooting outside
 #/home/pi/.local/bin/pipenv run python /home/pi/paolocator/nwtest.py
-#/home/pi/.local/bin/pipenv run echo "Trala" > worked.txt
-#/home/pi/.local/bin/pipenv run python main.py
-# BLAAAAAAAAAAAAAAAAAARHG
