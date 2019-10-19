@@ -1,0 +1,22 @@
+# I belong in /etc/systemd/system as b-paolocator.service
+
+[Unit]
+Description=Paolocator-b starter
+After=multi-user.target
+
+[Service]
+Type=idle
+ExecStart=/bin/bash /home/pi/paolocator/b_start.sh > /home/pi/logslogslogs.txt 2>&1
+
+[Install]
+WantedBy=multi-user.target
+
+# Allegedly permission on this file needs to be set to 644 aka u=rw g=r o=r
+# sudo chmod 644 /etc/systemd/system/b-paolocator.service
+# But idk why
+# And isn't this run as root???
+
+# sudo systemctl daemon-reload
+# sudo systemctl enable b-paolocator.service
+# sudo reboot
+# sudo systemctl status b-paolocator.service
