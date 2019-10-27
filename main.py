@@ -175,11 +175,11 @@ while True:
             cr_servo_pwm.start(7.7)
         elif diff > 0 + tolerate:
             # Turn arrow clockwise... slowly
-            cr_servo_pwm.start(7.4)
+            cr_servo_pwm.start(7.3)
 
-        time.sleep(0.1)
-        cr_servo_pwm.stop()
-        time.sleep(0.2)
+        #time.sleep(1)
+        #cr_servo_pwm.stop()
+        #time.sleep(1)
         print('\n')
     except Exception as e:
         if e is not KeyboardInterrupt:
