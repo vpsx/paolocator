@@ -14,5 +14,8 @@ cd /home/pi/paolocator
 # Actual thing that you want
 /home/pi/.local/bin/pipenv run python /home/pi/paolocator/main.py
 
+# If you wanted logs
+#/home/pi/.local/bin/pipenv run python /home/pi/paolocator/main.py > /home/pi/paolocator/logs.txt 2>&1
+
 # For when you are troubleshooting outside
 #/home/pi/.local/bin/pipenv run python /home/pi/paolocator/nwtest.py

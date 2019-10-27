@@ -48,6 +48,11 @@ learn.adafruit.com/adafruit-ultimate-gps/circuitpython-parsing
 
 Paolocator uses a Raspberry Pi Zero W with the Adafruit Ultimate GPS module.
 
+
+#### Servo
+
+CR servo, signal on pin 12, calibrated to 7.5 neutral.
+
 #### GPS
 
 This setup uses the Pi's built-in UART for GPS serial communication.
