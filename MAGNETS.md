@@ -3,7 +3,7 @@
 
 At any location, the Earth's magnetic field can be represented by a three-dimensional vector. A typical procedure for measuring its direction is to use a compass to determine the direction of magnetic North. Its angle relative to true North is the declination or variation. Facing magnetic North, the angle the field makes with the horizontal is the inclination or magnetic dip. The intensity of the field is proportional to the force it exerts on a magnet. Another common representation is in X (North), Y (East) and Z (Down) coordinates. (--Wikipedia)
 
-![Common coordinate systems used for representing the Earth's magnetic field.](https://upload.wikimedia.org/wikipedia/commons/1/16/XYZ-DIS_magnetic_field_coordinates.svg)
+<img src="https://upload.wikimedia.org/wikipedia/commons/1/16/XYZ-DIS_magnetic_field_coordinates.svg" width="800" alt="Common coordinate systems used for representing the Earth's magnetic field."/>
 
 So that's the Earth and its magnetic field. The three magnetometer readings, then, together express this red "magnetic North" vector, relative to the axes on the magnetometer itself.
 
@@ -15,14 +15,16 @@ The way you go from having an x and a y coordinate to having a heading is by usi
 
 So like this:
 
-![atan2(y,x) returns the angle θ between the ray to the point (x,y) and the positive x-axis, confined to (-π, π\].](https://upload.wikimedia.org/wikipedia/commons/a/ad/Atan2definition.svg =250x)
+<img src="https://upload.wikimedia.org/wikipedia/commons/a/ad/Atan2definition.svg" width="250" alt="atan2(y,x) returns the angle θ between the ray to the point (x,y) and the positive x-axis, confined to (-π, π]."/>
+
 You can then add 2π to all negative values of θ to get reflex angles, which for headings are more conventional.
 
 Note, though, that all this means it matters where the positive y-axis is: θ will be acute or obtuse when y is positive, and negative or reflex when y is negative. So if you look back at the first picture where the positive z-axis points downwards, this means that here, if you take the x-axis as your "nose", then atan2(y, x) actually gives you (2π-heading), not the heading itself.
 
 Conveniently or confusingly, the LSM303DLHC's axis orientation follows the right-hand convention like in the picture, but "upside down", with the z-axis pointing upwards.
 
-![The LSM303DLHC's axis orientation follows the right-hand convention, with the z-axis pointing upwards](https://cdn-shop.adafruit.com/970x728/1120-00.jpg =250x)
+<img src="https://cdn-shop.adafruit.com/970x728/1120-00.jpg" width="300" alt="The LSM303DLHC's axis orientation follows the right-hand convention, with the z-axis pointing upwards"/>
+
 This means that you have to decide which way up you are going to use your LSM303DLHC, and if you decide to have it PCB-side-up, which is to say positive-z-axis-side-up, then you can just use atan2(y, x) to get your heading. Yay!
 
 
