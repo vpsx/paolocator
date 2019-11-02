@@ -38,3 +38,36 @@ Conveniently or confusingly, the LSM303DLHC's axis orientation follows the right
 
 This means that you have to decide which way up you are going to use your LSM303DLHC, and if you decide to have it PCB-side-up, which is to say positive-z-axis-side-up, then you _can_ just use `atan2(y, x)` to get your heading. Yay!
 
+
+### Compensating for tilt
+
+The first picture superposes the positive x and y axes such that they are aligned with geographic North and East, but of course the axes on the actual magnetometer have nothing to do with geographic axes. You _can_ project the vector of Earth's magnetic field onto the plane tangent to the _Earth's_ surface (so, the x-y plane in the picture) and retain all the information needed to determine your heading; this is obviously not the same as saying that you can take the projection of the vector of Earth's magnetic field onto your magnetometer's x-y plane and do the same. The latter is only true if your magnetometer is always going to be level with the Earth's surface. 
+
+<details markdown="1">
+<summary>In other words...</summary>
+...ignoring the magnetometer's z-axis reading is in general not the same thing as taking the magnetic field vector's projection onto the Earth's x-y plane.
+</details>
+
+In all other situations you have to transform one coordinate space into another--your magnetometer's into the Earth's--and then you can project the vector onto the Earth's x-y plane. The information about how the magnetometer's coordinate space relates to the Earth's coordinate space is provided by the LSM303DLHC's accelerometer. 
+
+The accelerometer readings on the LSM303DLHC are in m/s^2 and express (if you are standing still) Earth's gravitational pull. 
+
+<details markdown="1">
+<summary>One can think of it as...</summary>
+...the vector defined by the three accelerometer readings is the vector orthogonal to the Earth's plane. Or it is "the Earth's z-axis", if you wave your hands a bit. 
+</details>
+
+so _pitch_ (forward/backward tilt, in this case rotation about the y-axis) is the arcsine of the normalised x reading, and _roll_ (sideways tilt, or rotation about the x-axis) is the arcsine of the normalised y reading. 
+
+TODO: Explain ^ more
+
+TODO: Note on normalisation
+
+        #print('Acceleration (m/s^2): ({0:10.3f}, {1:10.3f}, {2:10.3f})'.format(acc_x, acc_y, acc_z))
+        #print('Magnetometer (gauss): ({0:10.3f}, {1:10.3f}, {2:10.3f})'.format(mag_x, mag_y, mag_z))
+
+        acc_norm = math.sqrt(acc_x * acc_x + acc_y * acc_y + acc_z * acc_z)
+        pitch = math.asin(acc_x/acc_norm)
+        roll =  math.asin(acc_y/acc_norm)
+        print('Pitch  : {}'.format(math.degrees(pitch)))
+        print('Roll   : {}'.format(math.degrees(roll)))
