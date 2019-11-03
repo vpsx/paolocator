@@ -57,17 +57,25 @@ The accelerometer readings on the LSM303DLHC are in m/s^2 and express (if you ar
 ...the vector defined by the three accelerometer readings is the vector orthogonal to the Earth's plane. Or it is "the Earth's z-axis", if you wave your hands a bit. 
 </details>
 
-so _pitch_ (forward/backward tilt, in this case rotation about the y-axis) is the arcsine of the normalised x reading, and _roll_ (sideways tilt, or rotation about the x-axis) is the arcsine of the normalised y reading. 
+Intuitively: If you hold the accelerometer perfectly level to the ground, then the Earth's gravitational pull should register entirely on the accelerometer's z-axis. If you point the x-axis up a little bit, a little bit of gravity will be felt along the x-axis. Therefore, the answer to the question "How much of Earth's total gravitational pull is being felt along the accelerometer's x-axis?" is a direct expression of how much the x-axis is "pointing up". More generally, "how much gravity is being felt along each axis" precisely tells us "how the accelerometer is oriented in Earth's coordinate space".
 
-TODO: Explain ^ more
+The word for "how much the x-axis is pointing up" is _pitch_, and in exact analogy, "how much the y-axis is pointing up" is called _roll_. Pitch and roll (and yaw--the three rotations about the three axes) are expressed as angles. 
 
-TODO: Note on normalisation
+<img src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/04/Flight_dynamics_with_text_ortho.svg/1920px-Flight_dynamics_with_text_ortho.svg.png" width="400" alt="Pitch, roll, and yaw in an aircraft"/>
 
-        #print('Acceleration (m/s^2): ({0:10.3f}, {1:10.3f}, {2:10.3f})'.format(acc_x, acc_y, acc_z))
-        #print('Magnetometer (gauss): ({0:10.3f}, {1:10.3f}, {2:10.3f})'.format(mag_x, mag_y, mag_z))
+So we have three accelerometer readings, and we want to turn them into pitch and roll angles. Ignoring for a moment the y-axis, because drawing in 3D is hard, here is a very beautiful picture of the situation: 
 
-        acc_norm = math.sqrt(acc_x * acc_x + acc_y * acc_y + acc_z * acc_z)
-        pitch = math.asin(acc_x/acc_norm)
-        roll =  math.asin(acc_y/acc_norm)
-        print('Pitch  : {}'.format(math.degrees(pitch)))
-        print('Roll   : {}'.format(math.degrees(roll)))
+[TODO: Picture]
+
+We know `x` and `z` directly from the accelerometer readings, and Pythagoras' theorem tells us that `|g| = sqrt(x^2 + z^2)`. (We'll just call it `g`, not `|g|`, for simplicity.) We want to know what `p` is. If we knew `a`, then we could say `p = arcsine(a/x)`, but we don't know `a`. Fortunately, we can figure out what `a/x` is: 
+
+[TODO: Picture]
+
+The two small triangles are similar to the big, whole triangle, so we know `a/x = x/g`. So we have `p = arcsine x/g = arcsine(x/sqrt(x^2 + z^2))`.
+
+This is all in 2D, but the story generalizes directly to 3D--`g` just becomes `sqrt(x^2 + y^2 + z^2)` and `pitch = arcsine(x/sqrt(x^2  + y^2 + z^2))`. By analogous argument, we find that `roll = arcsine(y/sqrt(x^2  + y^2 + z^2))`.
+
+<details markdown="1">
+<summary>You can also think of this as normalisation: ...</summary>
+...dividing by <code>sqrt(x^2  + y^2 + z^2)</code> is like taking the magnitude of the full gravitational force to be 1, after which you may imagine the <code>g</code> vector as a vector on the unit sphere, and then you can do all the normal trigonometry on each of the axes, using the normalized readings. 
+</details>
