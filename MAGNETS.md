@@ -79,3 +79,15 @@ This is all in 2D, but the story generalizes directly to 3D--`g` just becomes `s
 <summary>You can also think of this as normalisation: ...</summary>
 ...dividing by <code>sqrt(x^2  + y^2 + z^2)</code> is like taking the magnitude of the full gravitational force to be 1, after which you may imagine the <code>g</code> vector as a vector on the unit sphere, and then you can do all the normal trigonometry on each of the axes, using the normalized readings. 
 </details>
+
+Now that we know pitch and roll, we know how the accelerometer/magnetometer are oriented in space, so we can transform accelerator/magnetometer coordinates into Earth coordinates, as planned. In fact it is not necessary to literally transform the coordinates and then project the vector onto the x-y plane. From pitch, roll, and the magnetometer readings, we can simply calculate and combine the relevant contributions from each of the three axes. This is a more direct way of achieving the same result. 
+
+With apologies one last time to the y-axis, which we will ignore in the following picture, here is what the magnetometer's x and z axes look like in relation to the Earth's x-y plane. 
+
+[TODO: Picture] 
+
+Here `a` is the part of the magnetic field along Earth's x-axis that is measured by the magnetometer's z-axis, and `b` is the part of the same measured by the magnetometer's x-axis. We see that `a = z sin(pitch)` and `b = x cos(pitch)`. We see also that (since the big arrow is the sum of the two small component arrows) when the x reading is positive, then the z reading must be negative, and inversely when x is negative then z must be positive. So the pitch-compensated x-reading is always `b - a`, or `x cos(pitch) - z sin(pitch)`. By completely analogous argument, the roll-compensated y-reading is `y cos(roll) - z sin(roll)`. 
+
+And those are the tilt-compensated x and y magnetometer values! As stated before, you take `atan2(y, x)` to get a heading within `(-π, π]`, and then you add 2π to the negative values and probably convert to degrees.
+
+Now you can take six random numbers about magnetic flux and gravity, and turn them into a compass heading! :tada: 
