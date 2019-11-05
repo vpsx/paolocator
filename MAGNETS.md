@@ -65,11 +65,11 @@ The word for "how much the x-axis is pointing up" is _pitch_, and in exact analo
 
 So we have three accelerometer readings, and we want to turn them into pitch and roll angles. Ignoring for a moment the y-axis, because drawing in 3D is hard, here is a very beautiful picture of the situation: 
 
-[TODO: Picture]
+<img src="https://raw.githubusercontent.com/vpsx/paolocator/master/pictures/paolocator_pitch_and_gravity.png" width="600" alt="gravity in x and z components; pitch"/>
 
 We know `x` and `z` directly from the accelerometer readings, and Pythagoras' theorem tells us that `|g| = sqrt(x^2 + z^2)`. (We'll just call it `g`, not `|g|`, for simplicity.) We want to know what `p` is. If we knew `a`, then we could say `p = arcsine(a/x)`, but we don't know `a`. Fortunately, we can figure out what `a/x` is: 
 
-[TODO: Picture]
+<img src="https://raw.githubusercontent.com/vpsx/paolocator/master/pictures/paolocator_similar_triangles.png" width="600" alt="the triangles are similar"/>
 
 The two small triangles are similar to the big, whole triangle, so we know `a/x = x/g`. So we have `p = arcsine x/g = arcsine(x/sqrt(x^2 + z^2))`.
 
@@ -84,7 +84,7 @@ Now that we know pitch and roll, we know how the accelerometer/magnetometer are 
 
 With apologies one last time to the y-axis, which we will ignore in the following picture, here is what the magnetometer's x and z axes look like in relation to the Earth's x-y plane. 
 
-[TODO: Picture] 
+<img src="https://raw.githubusercontent.com/vpsx/paolocator/master/pictures/paolocator_tilt_compensated_x.png" width="600" alt="projecting onto Earth's x-y plane"/>
 
 Here `a` is the part of the magnetic field along Earth's x-axis that is measured by the magnetometer's z-axis, and `b` is the part of the same measured by the magnetometer's x-axis. We see that `a = z sin(pitch)` and `b = x cos(pitch)`. We see also that (since the big arrow is the sum of the two small component arrows) when the x reading is positive, then the z reading must be negative, and inversely when x is negative then z must be positive. So the pitch-compensated x-reading is always `b - a`, or `x cos(pitch) - z sin(pitch)`. By completely analogous argument, the roll-compensated y-reading is `y cos(roll) - z sin(roll)`. 
 
