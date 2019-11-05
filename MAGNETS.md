@@ -91,3 +91,10 @@ Here `a` is the part of the magnetic field along Earth's x-axis that is measured
 And those are the tilt-compensated x and y magnetometer values! As stated before, you take `atan2(y, x)` to get a heading within `(-π, π]`, and then you add 2π to the negative values and probably convert to degrees.
 
 Now you can take six random numbers about magnetic flux and gravity, and turn them into a compass heading! :tada: 
+
+
+### Except that it's all futile anyway?????
+
+Because of hard and soft iron distortions--see [here](https://www.vectornav.com/support/library/magnetometer). See [here](https://www.vectornav.com/support/library/calibration#magnetometer) to learn about calibrating with Helmholtz coils, but it's a tad expensive. And [here](https://www.fierceelectronics.com/components/compensating-for-tilt-hard-iron-and-soft-iron-effects) is another resource on the subject. 
+
+Maybe you could try a [two-point calibration](https://learn.adafruit.com/calibrating-sensors/two-point-calibration), but you'd still need a reference magnetometer to give you raw readings (not a heading), and then the calibration would immediately become obsolete once you moved from your original spot.
