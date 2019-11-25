@@ -35,4 +35,8 @@ while True:
         heading = math.degrees(math.atan2(tilt_mag_y, tilt_mag_x))
         heading = 360 + heading if heading < 0 else heading
         print('Heading: {}'.format(heading))
+
+        vanillaheading = math.degrees(math.atan2(mag_y, mag_x))
+        vanillaheading = 360 + vanillaheading if vanillaheading < 0 else vanillaheading
+        print('Vanilla Heading: {}'.format(vanillaheading))
         print('\n')

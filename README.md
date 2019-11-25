@@ -80,3 +80,5 @@ A note on MEMS magnetometers: You need to think conspiratorially about your comp
 ### Random stuff
 
 configure network at `/etc/wpa_supplicant/wpa_supplicant.conf`
+
+`ip neigh`!!

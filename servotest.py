@@ -17,30 +17,31 @@ pwm = GPIO.PWM(pin_pwm, 50) # channel, frequency
 # FULL SPD FWD = 2ms pulse = dc10
 # FULL SPD BCK = 1ms pulse = dc5
 
-print("Starting up with dc 6.0")
-pwm.start(6.0)
-time.sleep(1)
-print("OK")
+#print("Starting up with dc 6.0")
+#pwm.start(6.0)
+#time.sleep(1)
+#print("OK")
+#
+## Probably comment this out
+#try:
+#    dc = 0.0
+#    while True:
+#        while dc < 10.0:
+#            dc += 0.5
+#            print(dc)
+#            pwm.ChangeDutyCycle(dc)
+#            time.sleep(1.0)
+#        while dc > 5.0:
+#            dc -= 0.5
+#            print(dc)
+#            pwm.ChangeDutyCycle(dc)
+#            time.sleep(1.0)
+#except KeyboardInterrupt:
+#    pass
+#    #pwm.stop()
+#    #GPIO.cleanup()
 
-# Probably comment this out
-try:
-    dc = 0.0
-    while True:
-        while dc < 10.0:
-            dc += 0.5
-            print(dc)
-            pwm.ChangeDutyCycle(dc)
-            time.sleep(1.0)
-        while dc > 5.0:
-            dc -= 0.5
-            print(dc)
-            pwm.ChangeDutyCycle(dc)
-            time.sleep(1.0)
-except KeyboardInterrupt:
-    pass
-    #pwm.stop()
-    #GPIO.cleanup()
-
+pwm.start(7.5)
 # Mainly use this
 try:
     while True:
