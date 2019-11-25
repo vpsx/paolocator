@@ -82,3 +82,8 @@ A note on MEMS magnetometers: You need to think conspiratorially about your comp
 configure network at `/etc/wpa_supplicant/wpa_supplicant.conf`
 
 `ip neigh`!!
+
+
+### Todo
+
+investigate latency on paolocator-b: see fix timestamps while walking around. Compare local to GET
