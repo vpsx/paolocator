@@ -26,7 +26,10 @@ import adafruit_gps
 
 # for a computer, use the pyserial library for uart access
 # if USB to serial then device name _probably_ /dev/ttyUSB0 but check dmesg.
-# if built-in UART on Pi then /dev/ttyS0
+# If using built-in UART on Pi then /dev/ttyS0;
+# if permissions errors arise check this before further investigation
+# https://learn.adafruit.com/circuitpython-on-raspberrypi-linux/uart-serial#the-hard-way-using-built-in-uart-2998808-15
+# (Also if you are trying to use a console through UART, then undo this first^)
 import serial
 uart = serial.Serial("/dev/ttyS0", baudrate=9600, timeout=3000)
 
