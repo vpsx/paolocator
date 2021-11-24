@@ -10,12 +10,10 @@ import adafruit_lsm303_accel
 import adafruit_lsm303dlh_mag
 import board
 import busio
-import RPi.GPIO as GPIO
+import digitalio
 import serial
 
-# #########################################################################
-
-# Configuration
+# ##########################   Configuration   ###############################
 
 TESTMODE = False
 # Test P values near Porta Nuova
@@ -27,24 +25,24 @@ TEST_Z_LNG = 7.675253
 
 # PAOLOSERVER ADDRESS
 PAOLOSERVER_WSADDR = "ws://whereispaolo.org:8080"
-
-# Duty cycle values - these should lean lower
-SERVO_NEUTRAL = 7.4       #7.5
-SERVO_CLOCKWISE = 6.8     #7.2
-SERVO_ANTICLOCKWISE = 7.8 #7.8
-# yes
-SERVO_MOVE_TIME = 0.16
+# Timeout in seconds for WS messages
+SOCKET_TIMEOUT = 1
 
 # Tolerate X degrees' difference between fwd azimuth and heading
-TOLERANCE = 7.0
+TOLERANCE = 6.0
 
 # Cadence in seconds;
 # Too short, and the WS stream backs up while gobbler waits for other fns
 # Too long, and other fns must wait for gobbler, stalling the pointer
 # A better solution is needed--probably involves low-level event loop control
-METRONOME = 0.5
+METRONOME = 0.20
 
-# #########################################################################
+# Delay between stepper motor steps in seconds;
+STEPPER_DELAY = 5/1000
+# how many steps at a time
+STEPPER_STEPS = 10
+
+# ############################################################################
 
 # Set up accelerometer and magnetometer
 i2c = busio.I2C(board.SCL, board.SDA)
@@ -67,18 +65,52 @@ gps.send_command(b'PMTK314,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0')
 #   Set update rate to once a second (1hz)
 gps.send_command(b'PMTK220,1000')
 
+# Set up stepper motor
+enable_pin = digitalio.DigitalInOut(board.D18)
+coil_A_1_pin = digitalio.DigitalInOut(board.D4)
+coil_A_2_pin = digitalio.DigitalInOut(board.D17)
+coil_B_1_pin = digitalio.DigitalInOut(board.D23)
+coil_B_2_pin = digitalio.DigitalInOut(board.D24)
+enable_pin.direction = digitalio.Direction.OUTPUT
+coil_A_1_pin.direction = digitalio.Direction.OUTPUT
+coil_A_2_pin.direction = digitalio.Direction.OUTPUT
+coil_B_1_pin.direction = digitalio.Direction.OUTPUT
+coil_B_2_pin.direction = digitalio.Direction.OUTPUT
+enable_pin.value = True
 
-# Set up continuous servo
-GPIO.setmode(GPIO.BCM)
-pwm_pin = 12
-GPIO.setup(pwm_pin, GPIO.OUT)
-pwm = GPIO.PWM(pwm_pin, 50) #Channel, frequency
-pwm.start(SERVO_NEUTRAL)
+def setStep(w1, w2, w3, w4):
+    """ Stepper motor helper """
+    coil_A_1_pin.value = w1
+    coil_A_2_pin.value = w2
+    coil_B_1_pin.value = w3
+    coil_B_2_pin.value = w4
+
+async def step_clockwise(steps):
+    for i in range(0, steps):
+        setStep(1, 0, 1, 0)
+        await asyncio.sleep(STEPPER_DELAY)
+        setStep(0, 1, 1, 0)
+        await asyncio.sleep(STEPPER_DELAY)
+        setStep(0, 1, 0, 1)
+        await asyncio.sleep(STEPPER_DELAY)
+        setStep(1, 0, 0, 1)
+        await asyncio.sleep(STEPPER_DELAY)
+
+async def step_anticlockwise(steps):
+    for i in range(0, steps):
+        setStep(1, 0, 0, 1)
+        await asyncio.sleep(STEPPER_DELAY)
+        setStep(0, 1, 0, 1)
+        await asyncio.sleep(STEPPER_DELAY)
+        setStep(0, 1, 1, 0)
+        await asyncio.sleep(STEPPER_DELAY)
+        setStep(1, 0, 1, 0)
+        await asyncio.sleep(STEPPER_DELAY)
 
 
 # Global values
 FWD_AZMT = 0
-#GOBBLE_SEMAPHORE = 1 #Not using this
+#GOBBLE_SEMAPHORE = 1 #Not using this...
 
 
 async def conductor():
@@ -93,9 +125,6 @@ async def conductor():
                       )
         except KeyboardInterrupt:
             print("Keyboard interrupt")
-            pwm.stop()
-            GPIO.cleanup()
-            print("GPIO cleanup done")
 
 async def find_where_to_point(websocket):
     """
@@ -103,7 +132,7 @@ async def find_where_to_point(websocket):
     - Go read the websocket and get P's location
     - Calculate forward azimuth
     """
-    global FWD_AZMT
+    global FWD_AZMT #, GOBBLE_SEMAPHORE
 
     # Where am I?
     gps.update()
@@ -135,7 +164,9 @@ async def find_where_to_point(websocket):
 
     # Where is Paolo?
     try:
-        msg = await asyncio.wait_for(websocket.recv(), timeout=1)
+        #GOBBLE_SEMAPHORE = 0
+        msg = await asyncio.wait_for(websocket.recv(), timeout=SOCKET_TIMEOUT)
+        #GOBBLE_SEMAPHORE = 1
         locdata = json.loads(msg)
         p_lat = locdata["coords"]["latitude"]
         p_lng = locdata["coords"]["longitude"]
@@ -213,18 +244,12 @@ async def get_the_pointer_there():
     # Move the pointer
     if diff < 0 - TOLERANCE:
         print("Go anti-clockwise!")
-        pwm.ChangeDutyCycle(SERVO_ANTICLOCKWISE)
-        await asyncio.sleep(SERVO_MOVE_TIME)
-        pwm.ChangeDutyCycle(SERVO_NEUTRAL)
+        await step_anticlockwise(STEPPER_STEPS)
     elif diff > 0 + TOLERANCE:
         print("Go clockwise!")
-        pwm.ChangeDutyCycle(SERVO_CLOCKWISE)
-        await asyncio.sleep(SERVO_MOVE_TIME)
-        pwm.ChangeDutyCycle(SERVO_NEUTRAL)
+        await step_clockwise(STEPPER_STEPS)
     else:
         print("You're in range... FOLLOW THAT ARROWWWWWWW")
-        pwm.ChangeDutyCycle(SERVO_NEUTRAL)
-        await asyncio.sleep(SERVO_MOVE_TIME)
 
 
 async def gobbler(websocket):
@@ -233,6 +258,7 @@ async def gobbler(websocket):
     stop = time.monotonic() + METRONOME
     while time.monotonic() < stop:
         try:
+            #if GOBBLE_SEMAPHORE == 1:
             await asyncio.wait_for(websocket.recv(), timeout=0.01)
         except:
             pass
