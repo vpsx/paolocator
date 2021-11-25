@@ -25,22 +25,20 @@ TEST_Z_LNG = 7.675253
 
 # PAOLOSERVER ADDRESS
 PAOLOSERVER_WSADDR = "ws://whereispaolo.org:8080"
-# Timeout in seconds for WS messages
-SOCKET_TIMEOUT = 1
+# Timeout in seconds for WS messages.
+# We expect Manalu/Paoloserver to send a WS message once every 0.5 seconds.
+SOCKET_TIMEOUT = 0.5
 
 # Tolerate X degrees' difference between fwd azimuth and heading
 TOLERANCE = 6.0
-
-# Cadence in seconds;
-# Too short, and the WS stream backs up while gobbler waits for other fns
-# Too long, and other fns must wait for gobbler, stalling the pointer
-# A better solution is needed--probably involves low-level event loop control
-METRONOME = 0.20
 
 # Delay between stepper motor steps in seconds;
 STEPPER_DELAY = 5/1000
 # how many steps at a time
 STEPPER_STEPS = 10
+# "One move" will be 4*DELAY*STEPS, currently 0.2 seconds.
+# How many pointer "moves" per paolocation update/azimuth update
+STEPPER_MOVES_PER_CYCLE = 2
 
 # ############################################################################
 
@@ -110,7 +108,6 @@ async def step_anticlockwise(steps):
 
 # Global values
 FWD_AZMT = 0
-#GOBBLE_SEMAPHORE = 1 #Not using this...
 
 
 async def conductor():
@@ -121,7 +118,6 @@ async def conductor():
                 await asyncio.gather(
                           find_where_to_point(websocket),
                           get_the_pointer_there(),
-                          gobbler(websocket),
                       )
         except KeyboardInterrupt:
             print("Keyboard interrupt")
@@ -132,7 +128,7 @@ async def find_where_to_point(websocket):
     - Go read the websocket and get P's location
     - Calculate forward azimuth
     """
-    global FWD_AZMT #, GOBBLE_SEMAPHORE
+    global FWD_AZMT
 
     # Where am I?
     gps.update()
@@ -164,17 +160,17 @@ async def find_where_to_point(websocket):
 
     # Where is Paolo?
     try:
-        #GOBBLE_SEMAPHORE = 0
         msg = await asyncio.wait_for(websocket.recv(), timeout=SOCKET_TIMEOUT)
-        #GOBBLE_SEMAPHORE = 1
         locdata = json.loads(msg)
         p_lat = locdata["coords"]["latitude"]
         p_lng = locdata["coords"]["longitude"]
         p_time = locdata["timestamp"]
+        readable_time = time.strftime("%a %d-%m-%Y %H:%M:%S", time.localtime(p_time/1000))
         print(f"Received from Pserver:")
         print(f"    LAT {p_lat}")
         print(f"    LNG {p_lng}")
         print(f"    TIME {p_time}")
+        print(f"    NICETIME {readable_time}")
     except asyncio.TimeoutError:
         print("Timed out waiting for info on P location... Cannot obtain fwd azimuth.")
         if not TESTMODE:
@@ -213,51 +209,40 @@ async def get_the_pointer_there():
     - Calculate diff with forward azimuth
     - Turn the pointer
     """
+    for cycle in range(STEPPER_MOVES_PER_CYCLE):
+        acc_x, acc_y, acc_z = accel.acceleration # m/s^2
+        mag_x, mag_y, mag_z = mag.magnetic # micro-Teslas
+        #print('Acceleration (m/s^2): ({0:10.3f}, {1:10.3f}, {2:10.3f})'.format(acc_x, acc_y, acc_z))
+        #print('Magnetometer (mcr-T): ({0:10.3f}, {1:10.3f}, {2:10.3f})'.format(mag_x, mag_y, mag_z))
+        acc_norm = math.sqrt(acc_x * acc_x + acc_y * acc_y + acc_z * acc_z)
+        pitch = math.asin(acc_x/acc_norm)
+        roll =  math.asin(acc_y/acc_norm)
+        #print('Pitch  : {}'.format(math.degrees(pitch)))
+        #print('Roll   : {}'.format(math.degrees(roll)))
+        # Could normalize mag vals as above but ehhh
+        # Tilt-compensated magnetic sensor measurements
+        tilt_mag_x = mag_x * math.cos(pitch) - mag_z * math.sin(pitch)
+        tilt_mag_y = mag_y * math.cos(roll) - mag_z * math.sin(roll)
+        #print('Tilt-comp mag       : ({0:10.3f}, {1:10.3f})'.format(tilt_mag_x, tilt_mag_y))
+        heading = math.degrees(math.atan2(tilt_mag_y, tilt_mag_x))
+        heading = 360 + heading if heading < 0 else heading
+        print('Heading: {}'.format(heading))
 
-    acc_x, acc_y, acc_z = accel.acceleration # m/s^2
-    mag_x, mag_y, mag_z = mag.magnetic # micro-Teslas
-    #print('Acceleration (m/s^2): ({0:10.3f}, {1:10.3f}, {2:10.3f})'.format(acc_x, acc_y, acc_z))
-    #print('Magnetometer (mcr-T): ({0:10.3f}, {1:10.3f}, {2:10.3f})'.format(mag_x, mag_y, mag_z))
-    acc_norm = math.sqrt(acc_x * acc_x + acc_y * acc_y + acc_z * acc_z)
-    pitch = math.asin(acc_x/acc_norm)
-    roll =  math.asin(acc_y/acc_norm)
-    #print('Pitch  : {}'.format(math.degrees(pitch)))
-    #print('Roll   : {}'.format(math.degrees(roll)))
-    # Could normalize mag vals as above but ehhh
-    # Tilt-compensated magnetic sensor measurements
-    tilt_mag_x = mag_x * math.cos(pitch) - mag_z * math.sin(pitch)
-    tilt_mag_y = mag_y * math.cos(roll) - mag_z * math.sin(roll)
-    #print('Tilt-comp mag       : ({0:10.3f}, {1:10.3f})'.format(tilt_mag_x, tilt_mag_y))
-    heading = math.degrees(math.atan2(tilt_mag_y, tilt_mag_x))
-    heading = 360 + heading if heading < 0 else heading
-    print('Heading: {}'.format(heading))
+        # Difference
+        diff = FWD_AZMT - heading
+        diff = diff % 360
+        diff = diff - 360 if diff > 180 else diff
+        print("Diff: {0:.6f} degrees".format(diff))
 
-    # Difference
-    diff = FWD_AZMT - heading
-    diff = diff % 360
-    diff = diff - 360 if diff > 180 else diff
-    print("Diff: {0:.6f} degrees".format(diff))
+        # Move the pointer
+        if diff < 0 - TOLERANCE:
+            print("Go anti-clockwise!")
+            await step_anticlockwise(STEPPER_STEPS)
+        elif diff > 0 + TOLERANCE:
+            print("Go clockwise!")
+            await step_clockwise(STEPPER_STEPS)
+        else:
+            print("You're in range... FOLLOW THAT ARROWWWWWWW")
 
-    # Move the pointer
-    if diff < 0 - TOLERANCE:
-        print("Go anti-clockwise!")
-        await step_anticlockwise(STEPPER_STEPS)
-    elif diff > 0 + TOLERANCE:
-        print("Go clockwise!")
-        await step_clockwise(STEPPER_STEPS)
-    else:
-        print("You're in range... FOLLOW THAT ARROWWWWWWW")
-
-
-async def gobbler(websocket):
-    """ Gobble up the Paolo-GPS websocket stream (so we can keep up) """
-    #print("Gobbler: " + str(time.monotonic()))
-    stop = time.monotonic() + METRONOME
-    while time.monotonic() < stop:
-        try:
-            #if GOBBLE_SEMAPHORE == 1:
-            await asyncio.wait_for(websocket.recv(), timeout=0.01)
-        except:
-            pass
 
 asyncio.run(conductor())
