@@ -213,9 +213,6 @@ async def get_the_pointer_there():
     - Calculate diff with forward azimuth
     - Turn the pointer
     """
-    if not FWD_AZMT:
-        print(f"Not moving ptr: No fwd azimuth avbl (or it is precisely zero yay!).")
-        return
 
     acc_x, acc_y, acc_z = accel.acceleration # m/s^2
     mag_x, mag_y, mag_z = mag.magnetic # micro-Teslas
