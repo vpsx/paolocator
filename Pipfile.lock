@@ -25,9 +25,9 @@
         },
         "adafruit-circuitpython-busdevice": {
             "hashes": [
-                "sha256:07a1430946b73925f98c6251b972bdf52c620d880150b1b4f5c7eff85b05fae7"
+                "sha256:9cb0a72cae19a14f8b7189f616daf9b443f86cbc3627ca5649a4f1d8793d489b"
             ],
-            "version": "==4.0.0"
+            "version": "==5.1.5"
         },
         "adafruit-circuitpython-gps": {
             "hashes": [
@@ -45,22 +45,25 @@
         },
         "adafruit-platformdetect": {
             "hashes": [
-                "sha256:11b0ae925ab430625c1e8abc5aabf850aa10bfff46f63cd580153e3f3b915cae"
+                "sha256:be1071fcd001383da96ad073235e5766a6d34ed6dfdeb4d4203c75b1883ec988"
             ],
-            "version": "==1.3.2"
+            "markers": "python_full_version >= '3.7.0'",
+            "version": "==3.37.0"
         },
         "adafruit-pureio": {
             "hashes": [
-                "sha256:e65cd929f1d8e109513ed1e457c2742bf4f15349c1a9b7f5b1e04191624d7488"
+                "sha256:2caf22fb07c7f771d83267f331a76cde314723f884a9570ea6f768730c87a879"
             ],
-            "version": "==0.2.3"
+            "markers": "python_full_version >= '3.5.0'",
+            "version": "==1.1.9"
         },
         "certifi": {
             "hashes": [
-                "sha256:046832c04d4e752f37383b628bc601a7ea7211496b4638f6514d0e5b9acc4939",
-                "sha256:945e3ba63a0b9f577b1395204e13c3a231f9bc0223888be653286534e5873695"
+                "sha256:35824b4c3a97115964b408844d64aa14db1cc518f6562e8d7261699d1350a9e3",
+                "sha256:4ad3232f5e926d6718ec31cfc1fcadfde020920e278684144551c91769c7bc18"
             ],
-            "version": "==2019.6.16"
+            "index": "pypi",
+            "version": "==2022.12.7"
         },
         "chardet": {
             "hashes": [
@@ -92,42 +95,30 @@
             "index": "pypi",
             "version": "==2.22.0"
         },
-        "rpi-ws281x": {
-            "hashes": [
-                "sha256:262ad65562333c20ccb1f10850f2413521dd300a2af16de32cbfa27b5b8353ac",
-                "sha256:bad191da9945d7ba9fe0f88ab70d04e6af1b554f520eaa50415f7bff1fa31150",
-                "sha256:d06cd31217dec40d715a3a07ccb2b4b0b0719527c5aa020cbdd77d0c0b31d113",
-                "sha256:dbbb04947b3166d96ba48a82702be9e9e762eb78922434e491d0de958f8fe8c7",
-                "sha256:eb2365f513b333fb1574131a1a719b66ffd252624c192ac0e954a5970cfea84f"
-            ],
-            "version": "==4.2.2"
-        },
-        "rpi.gpio": {
-            "hashes": [
-                "sha256:7424bc6c205466764f30f666c18187a0824077daf20b295c42f08aea2cb87d3f"
-            ],
-            "version": "==0.7.0"
-        },
         "spidev": {
             "hashes": [
-                "sha256:4314e52f573d95233c907f307558893313a8a606e197e77bb711526b0e179e80"
+                "sha256:14dbc37594a4aaef85403ab617985d3c3ef464d62bc9b769ef552db53701115b",
+                "sha256:280abc00a1ef7780ef62c3f294f52a2527b6c47d8c269fea98664970bcaf6da5"
             ],
-            "version": "==3.4"
+            "version": "==3.6"
         },
         "sysv-ipc": {
             "hashes": [
-                "sha256:b284e961274c67ed3debfdd8a43f197451c5f100955142bbed380258c6c73e06",
-                "sha256:b59fbd42c9de27b42fdda69c4aa7556312112dc6ac7246e44cd875cf049e4273",
-                "sha256:cd70548a92218ede2da499080b31e52f1d7cf60716c5cc7d468ec89e8b73c530"
+                "sha256:0f063cbd36ec232032e425769ebc871f195a7d183b9af32f9901589ea7129ac3",
+                "sha256:30611dccecd8fa0dc9f83d4d465e5047692df0ec9a095abef8b90ccc64afbdaf",
+                "sha256:4bbbe4e5ad5ab859e6d21fc8ff3e3b01082b959fa5c2cd76289dbcd56350c5f9",
+                "sha256:61190b934b0277f7a189092dcabceee8d9736fd73de90fd9b50ea69f0bac4723",
+                "sha256:ff6e3c98d8aa3e1ae5378d86869c4699c76f94318705d08085c97fb010770a31"
             ],
-            "version": "==1.0.0"
+            "version": "==1.1.0"
         },
         "urllib3": {
             "hashes": [
-                "sha256:b246607a25ac80bedac05c6f282e3cdaf3afb65420fd024ac94435cabe6e18d1",
-                "sha256:dbe59173209418ae49d485b87d1681aefa36252ee85884c31346debd19463232"
+                "sha256:8d7eaa5a82a1cac232164990f04874c594c9453ec55eef02eab885aa02fc17a2",
+                "sha256:f5321fbe4bf3fefa0efd0bfe7fb14e90909eb62a48ccda331726b4319897dd5e"
             ],
-            "version": "==1.25.3"
+            "markers": "python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3, 3.4' and python_version < '4'",
+            "version": "==1.25.11"
         }
     },
     "develop": {}
